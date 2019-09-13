@@ -5,6 +5,8 @@
 
     a practice naive bayes classifier from scratch for demonstration purposes
 
+    #TODO: rename things so they make more sense
+
     input taken from https://www.geeksforgeeks.org/naive-bayes-classifiers/
 
 '''
@@ -61,7 +63,8 @@ def classify(featureMatrix,responseVector,input):
     full_table = np.hstack((featureMatrix,responseVector))
     unique_responses = np.unique(responseVector.T).tolist()
 
-    p_feature_given_response = [] #a list of len(X)-1 lists. each internal list is len(responseVector) long
+    #get p(xi|y)
+    p_feature_given_response = [] #a list of len(X)-1 arrays each internal list is len(responseVector) long
     for i in range(len(full_table.T) - 1): #go through every individual feature
         featureList = X[i] 
         unique_features = np.unique(featureList).tolist()
@@ -74,20 +77,50 @@ def classify(featureMatrix,responseVector,input):
 
             responseCounts[featureIndex,responseIndex] += 1
         
-        print("----------------------------------------")
-        print("      " + str(unique_responses))
-        for feature in unique_features:
-            print(feature + ": " + str(responseCounts[unique_features.index(feature)]))
+        #print("      " + str(unique_responses))
+        
+        #for feature in unique_features:
+            #print(feature + ": " + str(responseCounts[unique_features.index(feature)]))
+        #print("----------------------------------------")
+
 
         p_feature_given_response.append(responseCounts)
 
-    #get the probability of the input by multiplying the probabilities of every indiviual feature (naive assumption)
+    #get p(y)s
+    p_response = [] #a list of probabilities of the given feature
+    for response in unique_responses:
+        p_response.append(responseVector.T.tolist()[0].count(response))
 
-       
-    #divide that value by the probability of the input
-        
+    #print("      " + str(unique_responses))
+    #print(p_response)
 
+    #calculate p(y|input) for all possible responses
+    p_response_given_input = []
+    
+    for response in unique_responses:
+        p_givens = []
+        responseIndex = unique_responses.index(response)
+        for i in range(len(p_feature_given_response)):
+            featureIndex = np.unique(X[i]).tolist().index(input[i])
 
+            p_givens.append(p_feature_given_response[i][featureIndex,responseIndex]/p_response[responseIndex])
+        #print(p_givens)
+        p_xi = np.product(p_givens) #first multiply all probabilities of input together
+        p_response_given_input.append(p_xi*(p_response[responseIndex]/N))
+
+    #print(p_response_given_input)
+
+    #normalize these values
+    p_response_given_input = [i/sum(p_response_given_input) for i in p_response_given_input]
+    print("      " + str(unique_responses))
+    print(p_response_given_input)
+
+    #make prediction based on response with the highest value
+    highest_i = 0
+    for i in range(len(p_response_given_input)):
+        if p_response_given_input[i] == max(p_response_given_input):
+            highest_i = i
+    return unique_responses[i] #return prediction
 
 def main():
     #test code for quantitativeRange()
@@ -107,7 +140,8 @@ def main():
     responseVector = np.array([playGolf]).T
 
     today = ('sunny','hot','normal','false')
-    classify(features,responseVector,today)
+    classification = classify(features,responseVector,today)
+    print(classification)
     
 
 main()
