@@ -66,13 +66,13 @@ def classify(featureMatrix,responseVector,input):
         featureList = X[i] 
         unique_features = np.unique(featureList).tolist()
 
-        responseCounts = np.zeros((len(unique_feature~s),len(unique_responses)))
+        responseCounts = np.zeros((len(unique_features),len(unique_responses)))
 
         for val,response in zip(featureList,full_table[:,len(full_table.T) - 1]):
             responseIndex = unique_responses.index(response)
             featureIndex = unique_features.index(val)
 
-            responseCounts[featureIndex][responseIndex] += 1
+            responseCounts[featureIndex,responseIndex] += 1
         
         print("----------------------------------------")
         print("      " + str(unique_responses))
